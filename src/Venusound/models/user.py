@@ -3,7 +3,7 @@
 import hashlib, string
 from Venusound import db
 
-class admin(db.Model):
+class User(db.Model):
     
     username = db.Column(db.String(80), primary_key=True)
     passwd = db.Column(db.String(250), unique=False)
