@@ -2,7 +2,7 @@
 
 from Venusound import db
 
-class LogDoubleCompression(db.Model):
+class log_double_compression(db.Model):
 
     event_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(80), db.ForeignKey('user.username'))
@@ -16,7 +16,7 @@ class LogDoubleCompression(db.Model):
                            backref=db.backref('user', order_by='user.username'))
 
 
-    def __init_(self, username, create_time, file_name, bitrate, hash_val, flag):
+    def __init__(self, username, create_time, file_name, bitrate, hash_val, flag):
         
         self.username = username
         self.create_time = create_time

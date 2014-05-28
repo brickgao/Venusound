@@ -11,8 +11,8 @@ app.config['SECRET_KEY'] = 'quaerendoinvenietis'
 
 db = SQLAlchemy(app)
 
-from models.User import User
-from models.LogDoubleCompression import LogDoubleCompression
-from models.LogCheckOffset import LogCheckOffset
+from models.User import user
+from models.LogDoubleCompression import log_double_compression
+from models.LogCheckOffset import log_check_offset
 
 db.create_all()

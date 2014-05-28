@@ -2,7 +2,7 @@
 
 from Venusound import db
 
-class LogCheckOffset(db.Model):
+class log_check_offset(db.Model):
 
     event_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(80), db.ForeignKey('user.username'))
@@ -17,7 +17,7 @@ class LogCheckOffset(db.Model):
                            backref=db.backref('user', order_by='user.username'))
 
 
-    def __init_(self, username, create_time, file_name, bitrate, hash_val, flag, info_dict):
+    def __init__(self, username, create_time, file_name, bitrate, hash_val, flag, info_dict):
         
         self.username = username
         self.create_time = create_time
