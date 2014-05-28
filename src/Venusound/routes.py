@@ -67,3 +67,9 @@ def SignUp():
         else:
             flash(u'用户名已经存在', 'error')
             return redirect('/signup')
+
+@app.route('/logout', methods=['GET'])
+def Logout():
+    session.pop('username', None)
+    flash(u'登出成功', 'success')
+    return redirect('/')
