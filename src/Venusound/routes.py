@@ -14,8 +14,8 @@ def GetIndex():
 @app.route('/login', methods=['GET', 'POST'])
 def Login():
     if 'username' in session:
-        flash(u'你需要登出后在登录', 'error')
-        return redirect('/manage')
+        flash(u'你需要登出后再登录', 'error')
+        return redirect('/')
     if request.method == 'GET':
         return render_template('login.html')
     else:
@@ -35,9 +35,35 @@ def Login():
             _passwd_with_salt = hashlib.sha512(_passwd + _user_info.salt).hexdigest()
             if _passwd_with_salt == _user_info.passwd:
                 session['username'] = _username
-                flash(u'欢迎回来，' + unicode(_username, 'gbk'), 'success')
+                flash(u'欢迎回来，' + _username, 'success')
                 return redirect('/')
             else:
                 flash(u'密码错误', 'error')
                 return redirect('/login')
-                
+
+@app.route('/signup', methods=['GET', 'POST'])
+def SignUp():
+    if 'username' in session:
+        flash(u'你需要登出后再注册', 'error')
+        return redirect('/')
+    if request.method == 'GET':
+        return render_template('signup.html')
+    else:
+        _username = request.form['username']
+        _passwd = request.form['passwd']
+        if _username == '':
+            flash(u'请填写用户名', 'error')
+            return redirect('/signup')
+        if _passwd == '':
+            flash(u'请填写密码', 'error')
+            return redirect('/signup')
+        _user_info = user.query.filter_by(username=_username).first()
+        if not _user_info:
+            _user_info = user(_username, _passwd)
+            db.session.add(_user_info)
+            db.session.commit()
+            flash(u'注册成功，请登录', 'success')
+            return redirect('/login')
+        else:
+            flash(u'用户名已经存在', 'error')
+            return redirect('/signup')
