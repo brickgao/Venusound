@@ -13,8 +13,8 @@ class log_check_offset(db.Model):
     flag = db.Column(db.Integer, primary_key=True, autoincrement=True)
     info_dict = db.Column(db.PickleType, unique=False)
     user = db.relationship('user',
-                           primaryjoin='User.username == username',
-                           backref=db.backref('user', order_by='user.username'))
+                           primaryjoin='log_check_offset.username == user.username',
+                           backref=db.backref('log_check_offset', order_by='log_check_offset.username'))
 
 
     def __init__(self, username, create_time, file_name, bitrate, hash_val, flag, info_dict):
