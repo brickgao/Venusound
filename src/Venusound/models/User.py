@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import hashlib, string
+import hashlib, string, random
 from Venusound import db
 
 class user(db.Model):
