@@ -14,7 +14,10 @@
     <link href="{{url_for('static', filename='css/bootstrap.min.css')}}" rel="stylesheet">
                                       
     <!-- Custom styles for this template -->
-    <link href="{{url_for('static', filename='css/manage_base.css')}}" rel="stylesheet">
+    <link href="{{url_for('static', filename='css/base.css')}}" rel="stylesheet">
+
+    <link href="{{url_for('static', filename='css/sco.message.css')}}" rel="stylesheet">
+    <link href="{{url_for('static', filename='css/scojs.css')}}" rel="stylesheet">
 
   </head>
 
@@ -36,7 +39,7 @@
             <li><a href="/">主页</a></li>
             <li><a href="/double_compression">重压缩检测</a></li>
             <li><a href="/check_offset">篡改定位检测</a></li>
-            <li><a href="/doc">说明文档</a></li>
+            <li><a href="/doc">系统帮助</a></li>
           </ul>
           {% if session.username %}
             <ul class="nav navbar-nav navbar-right">
@@ -71,9 +74,9 @@
        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
          {{error[0]}}
      </div>
+    </div>
     {% endif %}
     {% endwith %}
-    </div>
     
     {% block content %}
     {% endblock content %}
@@ -87,6 +90,10 @@
     </div>
     <script src="{{url_for('static', filename='js/jquery-2.1.0.min.js')}}"></script>
     <script src="{{url_for('static', filename='js/bootstrap.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/spin.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/sco.modal.js')}}"></script>
+    <script src="{{url_for('static', filename='js/Chart.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/wavesurfer.min.js')}}"></script>
     {% block jsextends %}{% endblock jsextends %} 
   </body>
 </html>
