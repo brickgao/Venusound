@@ -5,7 +5,6 @@ from flask import Flask, render_template, request, flash, redirect, abort, sessi
 from models.User import user
 from models.LogDoubleCompression import log_double_compression
 from models.LogCheckOffset import log_check_offset
-from werkzeug import secure_filename
 import hashlib, os, datetime, eyed3
 
 @app.route('/', methods=['GET'])
@@ -101,10 +100,11 @@ def GetDoubleCompressionList():
             _username = session['username']
             _file = request.files['file']
             _file_name = _file.filename
-            _s_file_name = secure_filename(_file.filename)
-            _folder_path = './upload'
+            _folder_path = '.\upload'
             if not os.path.exists(_folder_path):
                 os.makedirs(_folder_path)
+            _datetime_now = datetime.datetime.now()
+            _s_file_name = hashlib.md5(str(_datetime_now) + session['username']).hexdigest() + '.mp3'
             _file_path = os.path.join(_folder_path, _s_file_name)
             _file.save(_file_path)
             _md5 = ''
@@ -114,8 +114,7 @@ def GetDoubleCompressionList():
                 _md5 = _md5_obj.hexdigest()
             _audio = eyed3.load(_file_path)
             _bitrate = str(_audio.info.bit_rate[1])
-            _datetime_now = datetime.datetime.now()
-            _log_double_compression_info = log_double_compression(_username, _datetime_now, _s_file_name, _bitrate, _md5, 0)
+            _log_double_compression_info = log_double_compression(_username, _datetime_now, _file_name, _file_path, _bitrate, _md5, 0)
             db.session.add(_log_double_compression_info)
             db.session.commit()
             flash(u'上传成功', 'success')
