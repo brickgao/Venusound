@@ -5,7 +5,8 @@ from flask import Flask, render_template, request, flash, redirect, abort, sessi
 from models.User import user
 from models.LogDoubleCompression import log_double_compression
 from models.LogCheckOffset import log_check_offset
-import hashlib, os, datetime, eyed3
+from msic.detect_double_compression import detect_double_compression
+import hashlib, os, datetime, eyed3, msic, multiprocessing
 
 @app.route('/', methods=['GET'])
 def GetIndex():
@@ -117,6 +118,8 @@ def GetDoubleCompressionList():
             _log_double_compression_info = log_double_compression(_username, _datetime_now, _file_name, _file_path, _bitrate, _md5, 0)
             db.session.add(_log_double_compression_info)
             db.session.commit()
+            _p = multiprocessing.Process(target=detect_double_compression,args=(_file_path,))
+            _p.start()
             flash(u'上传成功', 'success')
             return u'文件上传成功'
         

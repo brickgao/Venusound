@@ -27,14 +27,22 @@
     <th>
        {% if e['flag'] == 0 %}
          <span class="label label-info">检测中</span>
-       {% elif e['flag'] == 1%}
-         <span class="label label-danger">经过重压缩</span>
-       {% else %}
+       {% elif e['flag'] == 1 %}
          <span class="label label-success">未经过重压缩</span>
+       {% elif e['flag'] == 2 %}
+         <span class="label label-danger">经过重压缩，原始码率 32 kbps</span>
+       {% elif e['flag'] == 3 %}
+         <span class="label label-danger">经过重压缩，原始码率 64 kbps</span>
+       {% elif e['flag'] == 4 %}
+         <span class="label label-danger">经过重压缩，原始码率 96 kbps</span>
+       {% elif e['flag'] == 5 %}
+         <span class="label label-danger">经过重压缩，原始码率 128 kbps</span>
+       {% else %}
+         <span class="label label-warning">不存在该码率的训练模型</span>
        {% endif %}
     </th>
     <th>
-       {% if e['flag'] == 1 %}
+       {% if e['flag'] > 1 %}
          <a class="btn btn-primary btn-xs" href="#" role="button">篡改定位检测</a>
        {% else %}
          <a class="btn btn-primary btn-xs disabled" href="#" role="button">篡改定位检测</a>
