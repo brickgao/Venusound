@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}重压缩检测{% endblock %}
+
+{% block content %}
+<div class="container">
+<a data-trigger="modal" data-title="提交新文件" class="btn btn-lg btn-primary" href="/static/html/sumbit.html" role="button">提交新文件</a>
+<p></p>
+<table class="table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>创建时间</th>
+      <th>文件名</th>
+      <th>MD5 值</th>
+      <th>码率</th>
+      <th>状态</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+</table>
+</div>
+{% endblock %}
+

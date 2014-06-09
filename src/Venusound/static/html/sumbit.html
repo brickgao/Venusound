@@ -1,0 +1,24 @@
+<div class="container">
+  <p></p>
+    <p>
+      <form enctype=multipart/form-data>
+        <input type="button" class="btn btn-primary" onclick="fileToUpload.click()" value="选择文件"/>
+        <div hidden="hidden">
+          <input type="file" name="file" id="fileToUpload" accept="audio/mp3" onchange="fileSelected()">
+        </div>
+        <button type="button" class="btn btn-primary" value="Upload" onclick="uploadFile()">上传</button>
+      </form>
+    </p>
+    <div class="alert alert-info" style="width: 50%">
+      <div id="fileName">文件名：</div>
+      <div id="fileSize">文件大小：</div>
+      <div id="fileType">文件类型：</div>
+    </div>
+    <p id="processPercent">上传进度：</p>
+    <div class="progress progress-striped active" style="width: 50%" id="progressNumber">
+      <div class="progress-bar" style="width: 0%;"></div>
+    </div>
+    </div>
+  </div>
+</div>
+

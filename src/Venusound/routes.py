@@ -5,7 +5,8 @@ from flask import Flask, render_template, request, flash, redirect, abort, sessi
 from models.User import user
 from models.LogDoubleCompression import log_double_compression
 from models.LogCheckOffset import log_check_offset
-import hashlib
+from werkzeug import secure_filename
+import hashlib, os
 
 @app.route('/', methods=['GET'])
 def GetIndex():
@@ -73,3 +74,24 @@ def Logout():
     session.pop('username', None)
     flash(u'登出成功', 'success')
     return redirect('/')
+
+@app.route('/double_compression', methods=['GET', 'POST'])
+def GetDoubleCompressionList():
+    if not 'username' in session:
+        flash(u'请先登录', 'error')
+        return redirect('/')
+    else:
+        if request.method == 'GET':
+            return render_template('double_compression_list.html')
+        else:
+            _username = session['username']
+            _file = request.files['file']
+            _file_name = _file.filename
+            _s_file_name = secure_filename(_file.filename)
+            _file_path = './upload'
+            if not os.path.exists(_file_path):
+                os.makedirs(_file_path)
+            _file.save(os.path.join(_file_path, _s_file_name))
+            flash(u'上传成功', 'success')
+            return u'文件上传成功'
+        
