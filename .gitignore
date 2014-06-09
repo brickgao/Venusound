@@ -2,4 +2,4 @@
 src/main.py
 src/venv
 src/Venusound/bot_data.db
-src/Venusound/upload
+src/upload
