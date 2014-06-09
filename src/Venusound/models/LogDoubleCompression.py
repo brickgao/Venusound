@@ -10,7 +10,7 @@ class log_double_compression(db.Model):
     file_name = db.Column(db.String(250), unique=False)
     bitrate = db.Column(db.Integer, unique=False)
     hash_val = db.Column(db.String(250), unique=False)
-    flag = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    flag = db.Column(db.Integer, unique=False)
     user = db.relationship('user',
                            primaryjoin='log_double_compression.username == user.username',
                            backref=db.backref('log_double_compression', order_by='log_double_compression.username'))

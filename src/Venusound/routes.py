@@ -6,7 +6,7 @@ from models.User import user
 from models.LogDoubleCompression import log_double_compression
 from models.LogCheckOffset import log_check_offset
 from werkzeug import secure_filename
-import hashlib, os
+import hashlib, os, datetime, eyed3
 
 @app.route('/', methods=['GET'])
 def GetIndex():
@@ -82,16 +82,42 @@ def GetDoubleCompressionList():
         return redirect('/')
     else:
         if request.method == 'GET':
-            return render_template('double_compression_list.html')
+            _username = session['username']
+            _file_info_list = log_double_compression.query.filter_by(username=_username)
+            _template_file_info_list = []
+            _cnt = 1
+            for _file_info in _file_info_list:
+                _dict = {}
+                _dict['id'] = str(_cnt)
+                _dict['create_time'] = _file_info.create_time.strftime("%Y-%m-%d %H:%M:%S")
+                _dict['filename'] = _file_info.file_name
+                _dict['bitrate'] = _file_info.bitrate
+                _dict['md5'] = _file_info.hash_val
+                _dict['flag'] = _file_info.flag
+                _template_file_info_list.append(_dict)
+                _cnt += 1
+            return render_template('double_compression_list.html', info_list=_template_file_info_list)
         else:
             _username = session['username']
             _file = request.files['file']
             _file_name = _file.filename
             _s_file_name = secure_filename(_file.filename)
-            _file_path = './upload'
-            if not os.path.exists(_file_path):
-                os.makedirs(_file_path)
-            _file.save(os.path.join(_file_path, _s_file_name))
+            _folder_path = './upload'
+            if not os.path.exists(_folder_path):
+                os.makedirs(_folder_path)
+            _file_path = os.path.join(_folder_path, _s_file_name)
+            _file.save(_file_path)
+            _md5 = ''
+            with open(_file_path, 'rb') as _file_obj:
+                _md5_obj = hashlib.md5()
+                _md5_obj.update(_file_obj.read())
+                _md5 = _md5_obj.hexdigest()
+            _audio = eyed3.load(_file_path)
+            _bitrate = str(_audio.info.bit_rate[1])
+            _datetime_now = datetime.datetime.now()
+            _log_double_compression_info = log_double_compression(_username, _datetime_now, _s_file_name, _bitrate, _md5, 0)
+            db.session.add(_log_double_compression_info)
+            db.session.commit()
             flash(u'上传成功', 'success')
             return u'文件上传成功'
         

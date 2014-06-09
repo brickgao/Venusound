@@ -17,6 +17,31 @@
       <th>操作</th>
     </tr>
   </thead>
+  {% for e in info_list %}
+  <tr>
+    <th>{{ e['id'] }}</th>
+    <th>{{ e['create_time'] }}</th>
+    <th>{{ e['filename'] }}</th>
+    <th>{{ e['md5'] }}</th>
+    <th>{{ e['bitrate'] }} kbps</th>
+    <th>
+       {% if e['flag'] == 0 %}
+         <span class="label label-info">检测中</span>
+       {% elif e['flag'] == 1%}
+         <span class="label label-danger">经过重压缩</span>
+       {% else %}
+         <span class="label label-success">未经过重压缩</span>
+       {% endif %}
+    </th>
+    <th>
+       {% if e['flag'] == 1 %}
+         <a class="btn btn-primary btn-xs" href="#" role="button">篡改定位检测</a>
+       {% else %}
+         <a class="btn btn-primary btn-xs disabled" href="#" role="button">篡改定位检测</a>
+       {% endif %}
+    </th>
+  </tr>
+  {% endfor %}
 </table>
 </div>
 {% endblock %}
