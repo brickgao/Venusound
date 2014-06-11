@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, flash, redirect, abort, sessi
 from models.User import user
 from models.LogDoubleCompression import log_double_compression
 from models.LogCheckOffset import log_check_offset
+from models.UploadFiles import upload_files
 from msic.detect_double_compression import detect_double_compression
 import hashlib, os, datetime, eyed3, msic, multiprocessing
 
@@ -116,10 +117,30 @@ def GetDoubleCompressionList():
             _audio = eyed3.load(_file_path)
             _bitrate = str(_audio.info.bit_rate[1])
             _log_double_compression_info = log_double_compression(_username, _datetime_now, _file_name, _file_path, _bitrate, _md5, 0)
+            _upload_files_info = upload_files(_username, _file_name, _file_path)
+            db.session.add(_upload_files_info)
             db.session.add(_log_double_compression_info)
             db.session.commit()
             _p = multiprocessing.Process(target=detect_double_compression,args=(_file_path,))
             _p.start()
             flash(u'上传成功', 'success')
             return u'文件上传成功'
+
+@app.route('/upload/<_file_name>', methods=['GET'])
+def getUploadFiles(_file_name):
+    if not 'username' in session:
+        flash(u'请先登录', 'error')
+        return redirect('/')
+    else:
+        _username = session['username']
+        _file_path = os.path.join('.\upload', _file_name)
+        _upload_files_info = upload_files.query.filter_by(username=_username, file_path=_file_path).first()
+        if _upload_files_info is None:
+            return abort(404)
+        else:
+            _file_path = _upload_files_info.file_path
+            with open(_file_path, 'rb') as _file_ret:
+                return _file_ret.read()
+            return abort(500)
+        
         

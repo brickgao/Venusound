@@ -14,5 +14,6 @@ db = SQLAlchemy(app)
 from models.User import user
 from models.LogDoubleCompression import log_double_compression
 from models.LogCheckOffset import log_check_offset
+from models.UploadFiles import upload_files
 
 db.create_all()
