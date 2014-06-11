@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{{ info['file_name'] }} 的检测结果{% endblock %}
+{% block content %}
+<div class = "container">
+  <span class="label label-success">提交日期: {{ info['create_time'] }}</span>
+  <h2>{{ info['file_name'] }} 的篡改定位检测结果</h2>
+  <hr>
+  <div class="panel panel-primary">
+  <!-- Default panel contents -->
+    <div class="panel-heading">文件信息</div>
+    <div class="panel-body">
+      <p>文件名: {{ info['file_name'] }}</p>
+      <p>文件大小: {{ info['file_size'] }} kb</p>
+      <p>MD5 值: {{ info['md5'] }}</p>
+      <p>比特率: {{ info['bitrate'] }} kbps</p>
+      <p>播放时间: {{ info['play_time'] }} s</p>
+    </div>
+  </div>
+  <div class="panel panel-primary">
+  <!-- Default panel contents -->
+    <div class="panel-heading">
+        波形图
+        <button type="button" class="btn btn-xs btn-success pull-right" onclick="wavesurfer.playPause()">播放/暂停</button>
+    </div>
+    <div class="panel-body">
+    <div id="waveform">
+    </div>
+    </div>
+  </div>
+  <div class="panel panel-primary">
+  <!-- Default panel contents -->
+    <div class="panel-heading">帧偏移图</div>
+    <div class="panel-body">
+      <canvas id="myChart" width="1100" height="200"></canvas>
+    </div>
+  </div>
+  <div class="panel panel-primary">
+  <!-- Default panel contents -->
+    <div class="panel-heading">检测结论</div>
+    <div class="panel-body">
+    {% for e in info['conclusion'] %}
+      <p>{{ e }}</p>
+    {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block jsextends %}
+<script>
+var data = {
+    labels: {{ e['x-axis'] }},
+	datasets : [
+		{
+			fillColor : "rgba(151,187,205,0.5)",
+			strokeColor : "rgba(151,187,205,1)",
+			pointColor : "rgba(151,187,205,1)",
+			pointStrokeColor : "#fff",
+			data : {{ e['offset'] }}
+		}
+	]};
+var ctx = $("#myChart").get(0).getContext("2d");
+var myLine = new Chart(ctx).Line(data);
+
+//This is for ploting PCM
+var wavesurfer = Object.create(WaveSurfer);
+wavesurfer.init({ container: '#waveform', waveColor: 'violet', progressColor: 'purple' });
+wavesurfer.load('/upload/{{ info['event_id'] }}.wav');
+wavesurfer.on('finish', function () {
+  wavesurfer.stop();
+});
+{% for e in info['distort-point'] %}
+{% endfor %}
+</script>
+{% endblock %}

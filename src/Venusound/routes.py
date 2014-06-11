@@ -91,7 +91,7 @@ def GetDoubleCompressionList():
                 _dict = {}
                 _dict['id'] = str(_cnt)
                 _dict['create_time'] = _file_info.create_time.strftime("%Y-%m-%d %H:%M:%S")
-                _dict['filename'] = _file_info.file_name
+                _dict['file_name'] = _file_info.file_name
                 _dict['bitrate'] = _file_info.bitrate
                 _dict['md5'] = _file_info.hash_val
                 _dict['flag'] = _file_info.flag
@@ -115,11 +115,23 @@ def GetDoubleCompressionList():
                 _md5_obj.update(_file_obj.read())
                 _md5 = _md5_obj.hexdigest()
             _audio = eyed3.load(_file_path)
-            _bitrate = str(_audio.info.bit_rate[1])
-            _log_double_compression_info = log_double_compression(_username, _datetime_now, _file_name, _file_path, _bitrate, _md5, 0)
+            _bitrate = _audio.info.bit_rate[1]
+            _play_time = _audio.info.time_secs
+            _file_size = os.path.getsize(_file_path)
+            _log_double_compression_info = log_double_compression(_username, _datetime_now, _file_name, 
+                                                                  _file_path, _file_size, _bitrate,
+                                                                  _play_time, _md5, 0)
             _upload_files_info = upload_files(_username, _file_name, _file_path)
             db.session.add(_upload_files_info)
             db.session.add(_log_double_compression_info)
+            db.session.commit()
+            # Decode MP3
+            _encoder = os.path.abspath(u'./Venusound/msic/lame_encode/lame_detect_double_compression.exe')
+            _wav_file_path = unicode(_file_path[:-3] + 'wav', 'gbk')
+            _wav_file_name = _file_name[:-3] + 'wav'
+            _recv = os.popen((_encoder + u' --decode \"' + _file_path + u'\" \"' + _wav_file_path + '\"').encode('gbk')).read()
+            _upload_files_info = upload_files(_username, _wav_file_name, _wav_file_path)
+            db.session.add(_upload_files_info)
             db.session.commit()
             _p = multiprocessing.Process(target=detect_double_compression,args=(_file_path,))
             _p.start()
@@ -158,14 +170,14 @@ def GetCheckOffsetList():
                 _dict = {}
                 _dict['id'] = str(_cnt)
                 _dict['create_time'] = _file_info.create_time.strftime("%Y-%m-%d %H:%M:%S")
-                _dict['filename'] = _file_info.file_name
+                _dict['file_name'] = _file_info.file_name
                 _dict['bitrate'] = _file_info.bitrate
                 _dict['md5'] = _file_info.hash_val
                 _dict['flag'] = _file_info.flag
                 _dict['log_url'] = '/check_offset/' + _file_info.file_path.split('\\')[2].split('.')[0]
                 _template_file_info_list.append(_dict)
                 _cnt += 1
-            return render_template('check_offset.html', info_list=_template_file_info_list)
+            return render_template('check_offset_list.html', info_list=_template_file_info_list)
         else:
             _username = session['username']
             _file = request.files['file']
@@ -183,13 +195,50 @@ def GetCheckOffsetList():
                 _md5_obj.update(_file_obj.read())
                 _md5 = _md5_obj.hexdigest()
             _audio = eyed3.load(_file_path)
-            _bitrate = str(_audio.info.bit_rate[1])
+            _bitrate = _audio.info.bit_rate[1]
+            _play_time = _audio.info.time_secs
+            _file_size = os.path.getsize(_file_path)
             _log_check_offset_info = log_check_offset(_username, _datetime_now, _file_name, _file_path, 
-                                                      _bitrate, _md5, 0, [])
+                                                      _file_size, _bitrate, _play_time, _md5, 0, [])
             _upload_files_info = upload_files(_username, _file_name, _file_path)
             db.session.add(_upload_files_info)
             db.session.add(_log_check_offset_info)
             db.session.commit()
+            # Decode MP3
+            _encoder = os.path.abspath(u'./Venusound/msic/lame_encode/lame_detect_double_compression.exe')
+            _wav_file_path = unicode(_file_path[:-3] + 'wav', 'gbk')
+            _wav_file_name = _file_name[:-3] + 'wav'
+            _recv = os.popen((_encoder + u' --decode \"' + _file_path + u'\" \"' + _wav_file_path + '\"').encode('gbk')).read()
+            _upload_files_info = upload_files(_username, _wav_file_name, _wav_file_path)
+            db.session.add(_upload_files_info)
+            db.session.commit()
             flash(u'上传成功', 'success')
             return u'文件上传成功'
         
+@app.route('/check_offset/<event_id>', methods=['GET'])
+def GetCheckOffsetLog(event_id):
+    if not 'username' in session:
+        flash(u'请先登录', 'error')
+        return redirect('/')
+    else:
+        _username = session['username']
+        _file_path = os.path.join('.\upload', event_id + '.mp3')
+        _log_check_offset_info = log_check_offset.query.filter_by(username=_username, file_path=_file_path).first()
+        if _log_check_offset_info is None:
+            flash(u'权限不足或者该检测不存在', 'error')
+            return redirect('/check_offset')
+        elif _log_check_offset_info.flag == 0:
+            flash(u'检测尚未完成', 'error')
+            return redirect('/check_offset')
+        else:
+            _dict = {}
+            _dict['create_time'] = _log_check_offset_info.create_time.strftime("%Y-%m-%d %H:%M:%S")
+            _dict['file_name'] = _log_check_offset_info.file_name
+            _dict['bitrate'] = _log_check_offset_info.bitrate
+            _dict['md5'] = _log_check_offset_info.hash_val
+            _dict['flag'] = _log_check_offset_info.flag
+            _dict['offset_list'] = _log_check_offset_info.offset_list
+            _dict['file_size'] = _log_check_offset_info.file_size
+            _dict['play_time'] = _log_check_offset_info.play_time
+            _dict['event_id'] = event_id
+            return render_template('check_offset_log.html', info=_dict)
