@@ -12,13 +12,13 @@ class log_check_offset(db.Model):
     bitrate = db.Column(db.Integer, unique=False)
     hash_val = db.Column(db.String(250), unique=False)
     flag = db.Column(db.Integer, unique=False)
-    info_dict = db.Column(db.PickleType, unique=False)
+    offset_list = db.Column(db.PickleType, unique=False)
     user = db.relationship('user',
                            primaryjoin='log_check_offset.username == user.username',
                            backref=db.backref('log_check_offset', order_by='log_check_offset.username'))
 
 
-    def __init__(self, username, create_time, file_name, file_path, bitrate, hash_val, flag, info_dict):
+    def __init__(self, username, create_time, file_name, file_path, bitrate, hash_val, flag, offset_list):
         
         self.username = username
         self.create_time = create_time
@@ -27,4 +27,4 @@ class log_check_offset(db.Model):
         self.bitrate = bitrate
         self.hash_val = hash_val
         self.flag = flag
-        self.info_dict = info_dict
+        self.offset_list = offset_list
