@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from Venusound import *
-import os, wave_op, eyed3, sys, tempfile
+import os, wave_op, eyed3, sys, tempfile, shutil
 from collections import Counter
 from libsvm.svmutil import *
 from Venusound.models.LogDoubleCompression import log_double_compression
@@ -79,7 +79,7 @@ def detect_double_compression(_file_path):
     if not os.path.exists(_temp_path):
         os.makedirs(_temp_path)
     else:
-        os.rmdir(_temp_path)
+        shutil.rmtree(_temp_path)
         os.makedirs(_temp_path)
     os.chdir(_temp_path)
     _x, _y = [], [0]

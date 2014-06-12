@@ -48,14 +48,14 @@
 {% block jsextends %}
 <script>
 var data = {
-    labels: {{ e['x-axis'] }},
+    labels: {{ info['x-axis'] }},
 	datasets : [
 		{
 			fillColor : "rgba(151,187,205,0.5)",
 			strokeColor : "rgba(151,187,205,1)",
 			pointColor : "rgba(151,187,205,1)",
 			pointStrokeColor : "#fff",
-			data : {{ e['offset'] }}
+			data : {{ info['offset_list'] }}
 		}
 	]};
 var ctx = $("#myChart").get(0).getContext("2d");
@@ -68,7 +68,12 @@ wavesurfer.load('/upload/{{ info['event_id'] }}.wav');
 wavesurfer.on('finish', function () {
   wavesurfer.stop();
 });
+wavesurfer.on('ready', function () {
 {% for e in info['distort-point'] %}
+  wavesurfer.mark({position: {{ e }},
+                   color: 'rgba(255, 0, 0, 0.5)',
+                   width: {{ info['mark_width'] }}});
 {% endfor %}
+});
 </script>
 {% endblock %}

@@ -10,7 +10,7 @@ class log_check_offset(db.Model):
     file_name = db.Column(db.String(250), unique=False)
     file_path = db.Column(db.String(500), unique=False)
     file_size = db.Column(db.Integer, unique=False)
-    play_time = db.Column(db.Integer, unique=False)
+    play_time = db.Column(db.Float, unique=False)
     bitrate = db.Column(db.Integer, unique=False)
     hash_val = db.Column(db.String(250), unique=False)
     flag = db.Column(db.Integer, unique=False)
