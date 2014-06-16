@@ -96,6 +96,8 @@ def GetDoubleCompressionList():
                 _dict['bitrate'] = _file_info.bitrate
                 _dict['md5'] = _file_info.hash_val
                 _dict['flag'] = _file_info.flag
+                _dict['make_check_offset_url'] = '/make_check_offset/' + \
+                                                 _file_info.file_path.split('\\')[2].split('.')[0]
                 _template_file_info_list.append(_dict)
                 _cnt += 1
             return render_template('double_compression_list.html', info_list=_template_file_info_list)
@@ -123,7 +125,7 @@ def GetDoubleCompressionList():
                 _md5 = _md5_obj.hexdigest()
             _audio = eyed3.load(_file_path)
             _bitrate = _audio.info.bit_rate[1]
-            _file_in = wave.open(_wav_file_name, 'rb')
+            _file_in = wave.open(_wav_file_path, 'rb')
             _play_time = _file_in.getparams()[3] / 22050.
             _file_size = os.path.getsize(_file_path)
             _log_double_compression_info = log_double_compression(_username, _datetime_now, _file_name, 
@@ -257,3 +259,35 @@ def GetCheckOffsetLog(event_id):
                     _dict['distort-point'].append(_each_frame_time * _i)
             _dict['conclusion'][0] = u'共有 %d 个篡改点：' % _cnt
             return render_template('check_offset_log.html', info=_dict)
+
+@app.route('/make_check_offset/<event_id>', methods=['GET'])
+def MakeCheckOffset(event_id):
+    if not 'username' in session:
+        flash(u'请先登录', 'error')
+        return redirect('/')
+    else:
+        _username = session['username']
+        _file_path = os.path.join('.\upload', event_id + '.mp3')
+        _log_double_compression_info = log_double_compression.query.filter_by(username=_username, file_path=_file_path).first()
+        if _log_double_compression_info is None:
+            flash(u'该检测不存在', 'error')
+            return redirect('/double_compression')
+        elif _log_double_compression_info.flag <= 1:
+            flash(u'检测尚未完成或者未经过重压缩', 'error')
+            return redirect('/double_compression')
+        else:
+            _datetime_now = datetime.datetime.now()
+            _file_name = _log_double_compression_info.file_name
+            _file_path = _log_double_compression_info.file_path
+            _file_size = _log_double_compression_info.file_size
+            _bitrate = _log_double_compression_info.bitrate
+            _play_time = _log_double_compression_info.play_time
+            _md5 = _log_double_compression_info.hash_val
+            _log_check_offset_info = log_check_offset(_username, _datetime_now, _file_name, _file_path, 
+                                                      _file_size, _bitrate, _play_time, _md5, 0, [])
+            db.session.add(_log_check_offset_info)
+            db.session.commit()
+            _p = multiprocessing.Process(target=check_offset_main, args=(_file_path,))
+            _p.start()
+            flash(u'新建篡改定位检测成功', 'success')
+            return redirect('/check_offset')
