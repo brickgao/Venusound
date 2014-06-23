@@ -36,8 +36,10 @@
     <th>
        {% if e['flag'] != 0 %}
          <a class="btn btn-primary btn-xs" href="{{ e['log_url'] }}" role="button">查看</a>
+         <a class="btn btn-danger btn-xs" href="{{ e['del_url'] }}" role="button">删除</a>
        {% else %}
          <a class="btn btn-primary btn-xs disabled" href="#" role="button">查看</a>
+         <a class="btn btn-danger btn-xs disabled" href="#" role="button">删除</a>
        {% endif %}
     </th>
   </tr>

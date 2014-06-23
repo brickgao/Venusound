@@ -98,6 +98,7 @@ def GetDoubleCompressionList():
                 _dict['flag'] = _file_info.flag
                 _dict['make_check_offset_url'] = '/make_check_offset/' + \
                                                  _file_info.file_path.split('\\')[2].split('.')[0]
+                _dict['del_url'] = '/del/double_compression/' + _file_info.file_path.split('\\')[2].split('.')[0]
                 _template_file_info_list.append(_dict)
                 _cnt += 1
             return render_template('double_compression_list.html', info_list=_template_file_info_list)
@@ -178,6 +179,7 @@ def GetCheckOffsetList():
                 _dict['md5'] = _file_info.hash_val
                 _dict['flag'] = _file_info.flag
                 _dict['log_url'] = '/check_offset/' + _file_info.file_path.split('\\')[2].split('.')[0]
+                _dict['del_url'] = '/del/check_offset/' + _file_info.file_path.split('\\')[2].split('.')[0]
                 _template_file_info_list.append(_dict)
                 _cnt += 1
             return render_template('check_offset_list.html', info_list=_template_file_info_list)
@@ -322,4 +324,44 @@ def NeedRefreshCheckOffset():
         else:
             return '0'
 
-
+@app.route('/del/double_compression/<event_id>', methods=['GET'])
+def DelDoubleCompression(event_id):
+    if not 'username' in session:
+        return abort(404)
+    else:
+        _user_info = session['username']
+        _username = session['username']
+        _file_path = os.path.join('.\upload', event_id + '.mp3')
+        _log_double_compression_info = log_double_compression.query.filter_by(username=_username, file_path=_file_path).first()
+        if _log_double_compression_info is None:
+            flash(u'该检测不存在', 'error')
+            return redirect('/double_compression')
+        elif _log_double_compression_info.flag == 0:
+            flash(u'检测尚未完成', 'error')
+            return redirect('/double_compression')
+        else:
+            db.session.delete(_log_double_compression_info)
+            db.session.commit()
+            flash(u'删除记录成功', 'success')
+            return redirect('/double_compression')
+    
+@app.route('/del/check_offset/<event_id>', methods=['GET'])
+def DelCheckOffset(event_id):
+    if not 'username' in session:
+        return abort(404)
+    else:
+        _user_info = session['username']
+        _username = session['username']
+        _file_path = os.path.join('.\upload', event_id + '.mp3')
+        _log_check_offset_info = log_check_offset.query.filter_by(username=_username, file_path=_file_path).first()
+        if _log_check_offset_info is None:
+            flash(u'该检测不存在', 'error')
+            return redirect('/double_compression')
+        elif _log_check_offset_info.flag == 0:
+            flash(u'检测尚未完成', 'error')
+            return redirect('/double_compression')
+        else:
+            db.session.delete(_log_check_offset_info)
+            db.session.commit()
+            flash(u'删除记录成功', 'success')
+            return redirect('/check_offset')

@@ -44,8 +44,10 @@
     <th>
        {% if e['flag'] > 1 %}
          <a class="btn btn-primary btn-xs" href="{{ e['make_check_offset_url'] }}" role="button">篡改定位检测</a>
+         <a class="btn btn-danger btn-xs" href="{{ e['del_url'] }}" role="button">删除</a>
        {% else %}
          <a class="btn btn-primary btn-xs disabled" href="#" role="button">篡改定位检测</a>
+         <a class="btn btn-danger btn-xs disabled" href="#" role="button">删除</a>
        {% endif %}
     </th>
   </tr>
