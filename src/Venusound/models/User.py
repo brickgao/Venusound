@@ -8,6 +8,8 @@ class user(db.Model):
     username = db.Column(db.String(80), primary_key=True)
     passwd = db.Column(db.String(250), unique=False)
     salt = db.Column(db.String(10), unique=False)
+    need_refresh_double_compression = db.Column(db.Integer, unique=False)
+    need_refresh_check_offset = db.Column(db.Integer, unique=False)
 
 
     def __init__(self, username, passwd):
@@ -17,3 +19,5 @@ class user(db.Model):
         self.username = username
         self.salt = _salt
         self.passwd = _passwd_with_salt
+        self.need_refresh_double_compression = 0
+        self.need_refresh_check_offset = 0

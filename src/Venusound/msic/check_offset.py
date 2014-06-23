@@ -5,6 +5,7 @@ import os, wave_op, eyed3, sys, tempfile, shutil, multiprocessing, math
 from collections import Counter
 from libsvm.svmutil import *
 from Venusound.models.LogCheckOffset import log_check_offset
+from Venusound.models.User import user
 
 def mp3_pre_handle(_file_path, _db_l, _encoder):
     if not os.path.exists(u'.\wave_sample'):
@@ -89,6 +90,9 @@ def check_offset_speed_up(_bitrate, _mdct_ret_d, _arg_dif_l, _db_l, _base_path, 
     for _i in range(_from_begin + 1, len(_offset)):
         if (_i < len(_arg_dif_l) and _arg_dif_l[_i] < 0.01) or (_i < len(_db_l) and _db_l[_i] >= 400):
             _offset[_i] = _offset[_i - 1]
+    for _i in range(len(_offset) - 3):
+        if _offset[_i] == _offset[_i + 3]:
+            _offset[_i + 1], _offset[_i + 2] = _offset[_i], _offset[_i]
     return _offset
 
 def check_offset_main(_file_path):
@@ -102,6 +106,7 @@ def check_offset_main(_file_path):
     _audio_bitrate = _audio.info.bit_rate[1]
     _folder_name = _file_path.split('\\')[2].split('.')[0]
     _log_check_offset_info = log_check_offset.query.filter_by(file_path=_file_path).first()
+    _user_info = user.query.filter_by(username=_log_check_offset_info.username).first()
     _temp_path = os.path.join(tempfile.gettempdir(), _folder_name)
     if not os.path.exists(_temp_path):
         os.makedirs(_temp_path)
@@ -120,6 +125,9 @@ def check_offset_main(_file_path):
             break
     _log_check_offset_info.flag = _flag
     _log_check_offset_info.offset_list = _offset
+    _user_info.need_refresh_check_offset = 1
     db.session.add(_log_check_offset_info)
+    db.session.add(_user_info)
     db.session.commit()
     shutil.rmtree(u'./wave_sample')
+    return None

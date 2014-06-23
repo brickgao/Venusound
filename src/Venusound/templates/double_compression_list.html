@@ -53,4 +53,20 @@
 </table>
 </div>
 {% endblock %}
+{% block jsextends %}
+<script type="text/javascript" charset="utf-8">
+setInterval(function() {
+              var xmlhttp = new XMLHttpRequest();
+              xmlhttp.open('GET', '/need_refresh_double_compression', true);
+              xmlhttp.send();
+              xmlhttp.onreadystatechange = function() {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                  if (xmlhttp.responseText === '1') {
+                    location.reload();
+                  }
+                }
+              }
+            }, 1000);
+</script>
+{% endblock %}
 

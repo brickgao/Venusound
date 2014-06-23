@@ -6,9 +6,9 @@ from models.User import user
 from models.LogDoubleCompression import log_double_compression
 from models.LogCheckOffset import log_check_offset
 from models.UploadFiles import upload_files
-from msic.detect_double_compression import detect_double_compression
+from msic.detect_double_compression import detect_double_compression_main
 from msic.check_offset import check_offset_main
-import hashlib, os, datetime, eyed3, msic, multiprocessing, wave
+import hashlib, os, datetime, eyed3, msic, wave, multiprocessing, blinker
 
 @app.route('/', methods=['GET'])
 def GetIndex():
@@ -136,7 +136,7 @@ def GetDoubleCompressionList():
             db.session.add(_log_double_compression_info)
             db.session.add(_upload_files_info)
             db.session.commit()
-            _p = multiprocessing.Process(target=detect_double_compression, args=(_file_path,))
+            _p = multiprocessing.Process(target=detect_double_compression_main, args=(_file_path, ))
             _p.start()
             flash(u'上传成功', 'success')
             return u'文件上传成功'
@@ -215,7 +215,7 @@ def GetCheckOffsetList():
             db.session.add(_log_check_offset_info)
             db.session.add(_upload_files_info)
             db.session.commit()
-            _p = multiprocessing.Process(target=check_offset_main, args=(_file_path,))
+            _p = multiprocessing.Process(target=check_offset_main, args=(_file_path, ))
             _p.start()
             flash(u'上传成功', 'success')
             return u'文件上传成功'
@@ -287,7 +287,39 @@ def MakeCheckOffset(event_id):
                                                       _file_size, _bitrate, _play_time, _md5, 0, [])
             db.session.add(_log_check_offset_info)
             db.session.commit()
-            _p = multiprocessing.Process(target=check_offset_main, args=(_file_path,))
+            _p = multiprocessing.Process(target=check_offset_main, args=(_file_path, ))
             _p.start()
             flash(u'新建篡改定位检测成功', 'success')
             return redirect('/check_offset')
+
+@app.route('/need_refresh_double_compression', methods=['GET'])
+def NeedRefreshDoubleCompression():
+    if not 'username' in session:
+        return abort(404)
+    else:
+        _username = session['username']
+        _user_info = user.query.filter_by(username=_username).first()
+        if _user_info.need_refresh_double_compression == 1:
+            _user_info.need_refresh_double_compression = 0
+            db.session.add(_user_info)
+            db.session.commit()
+            return '1'
+        else:
+            return '0'
+
+@app.route('/need_refresh_check_offset', methods=['GET'])
+def NeedRefreshCheckOffset():
+    if not 'username' in session:
+        return abort(404)
+    else:
+        _username = session['username']
+        _user_info = user.query.filter_by(username=_username).first()
+        if _user_info.need_refresh_check_offset == 1:
+            _user_info.need_refresh_check_offset = 0
+            db.session.add(_user_info)
+            db.session.commit()
+            return '1'
+        else:
+            return '0'
+
+

@@ -5,6 +5,7 @@ import os, wave_op, eyed3, sys, tempfile, shutil
 from collections import Counter
 from libsvm.svmutil import *
 from Venusound.models.LogDoubleCompression import log_double_compression
+from Venusound.models.User import user
 
 # Decoder path
 _decoder = os.path.abspath(u'./Venusound/msic/mpg123_decode/mpg123_to_wav.exe')
@@ -61,11 +62,12 @@ def get_feature(_file_path):
         _feature[_i + 1] = _origin_avg[_i] - _double_avg[_i]
     return _feature
 
-def detect_double_compression(_file_path):
+def detect_double_compression_main(_file_path):
     _abs_file_path = os.path.abspath(_file_path)
     _audio = eyed3.load(_abs_file_path)
     _audio_bitrate = _audio.info.bit_rate[1]
     _log_double_compression_info = log_double_compression.query.filter_by(file_path=_file_path).first()
+    _user_info = user.query.filter_by(username=_log_double_compression_info.username).first()
     _m = None
     if _audio_bitrate in _libsvm_model_list:
         _m = svm_load_model(_libsvm_model_list[_audio_bitrate])
@@ -86,7 +88,8 @@ def detect_double_compression(_file_path):
     _x.append(get_feature(_abs_file_path))
     p_labels, p_acc, p_vals = svm_predict(_y, _x, _m)
     _log_double_compression_info.flag = p_labels[0]
+    _user_info.need_refresh_double_compression = 1
     db.session.add(_log_double_compression_info)
+    db.session.add(_user_info)
     db.session.commit()
     return None
-    

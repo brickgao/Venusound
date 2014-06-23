@@ -50,7 +50,7 @@ function uploadProgress(evt) {
 
 function uploadComplete(evt) {
   setProcess(100);
-  location.reload()
+  location.reload();
     //document.getElementById('success-msg').innerHTML = evt.target.responseText
     //$("#success-bar").show()
 }
