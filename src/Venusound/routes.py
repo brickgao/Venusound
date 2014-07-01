@@ -8,6 +8,7 @@ from models.LogCheckOffset import log_check_offset
 from models.UploadFiles import upload_files
 from msic.detect_double_compression import detect_double_compression_main
 from msic.check_offset import check_offset_main
+from pydub import AudioSegment
 import hashlib, os, datetime, eyed3, msic, wave, multiprocessing, blinker
 
 @app.route('/', methods=['GET'])
@@ -114,10 +115,10 @@ def GetDoubleCompressionList():
             _file_path = os.path.join(_folder_path, _s_file_name)
             _file.save(_file_path)
             # Decode MP3
-            _encoder = os.path.abspath(u'./Venusound/msic/lame_encode/lame_detect_double_compression.exe')
             _wav_file_path = unicode(_file_path[:-3] + 'wav', 'gbk')
             _wav_file_name = _file_name[:-3] + 'wav'
-            _recv = os.popen((_encoder + u' --decode \"' + _file_path + u'\" \"' + _wav_file_path + '\"').encode('gbk')).read()
+            _sound = AudioSegment.from_mp3(_file_path)
+            _sound.export(_wav_file_path, format="wav")
             _wav_upload_files_info = upload_files(_username, _wav_file_name, _wav_file_path)
             _md5 = ''
             with open(_file_path, 'rb') as _file_obj:
@@ -195,10 +196,10 @@ def GetCheckOffsetList():
             _file_path = os.path.join(_folder_path, _s_file_name)
             _file.save(_file_path)
             # Decode MP3
-            _encoder = os.path.abspath(u'./Venusound/msic/lame_encode/lame_detect_double_compression.exe')
             _wav_file_path = unicode(_file_path[:-3] + 'wav', 'gbk')
             _wav_file_name = _file_name[:-3] + 'wav'
-            _recv = os.popen((_encoder + u' --decode \"' + _file_path + u'\" \"' + _wav_file_path + '\"').encode('gbk')).read()
+            _sound = AudioSegment.from_mp3(_file_path)
+            _sound.export(_wav_file_path, format="wav")
             _wav_upload_files_info = upload_files(_username, _wav_file_name, _wav_file_path)
             _md5 = ''
             with open(_file_path, 'rb') as _file_obj:
@@ -251,14 +252,14 @@ def GetCheckOffsetLog(event_id):
             _dict['x-axis'] = [_i for _i in range(1, len(_dict['offset_list']) + 1)]
             _dict['distort-point'] = []
             _dict['conclusion'] = ['']
-            _dict['mark_width'] = 1100. / len(_dict['offset_list'])
-            _each_frame_time = _log_check_offset_info.play_time / len(_dict['offset_list'])
+            _dict['mark_width'] = 1100. * 2. / (len(_dict['offset_list']) + 1)
+            _each_frame_time = _log_check_offset_info.play_time / (len(_dict['offset_list']) + 1)
             _cnt = 0
             for _i in range(len(_dict['offset_list'])- 1):
                 if _dict['offset_list'][_i] != _dict['offset_list'][_i + 1]:
                     _cnt += 1
                     _dict['conclusion'].append(u'%d. 篡改发生在第 %d 帧和第 %d 帧之间' % (_cnt, _i, _i + 1))
-                    _dict['distort-point'].append(_each_frame_time * _i)
+                    _dict['distort-point'].append(576. / 22050 * _i)
             _dict['conclusion'][0] = u'共有 %d 个篡改点：' % _cnt
             return render_template('check_offset_log.html', info=_dict)
 
