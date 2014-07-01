@@ -105,41 +105,44 @@ def GetDoubleCompressionList():
             return render_template('double_compression_list.html', info_list=_template_file_info_list)
         else:
             _username = session['username']
-            _file = request.files['file']
-            _file_name = _file.filename
-            _folder_path = '.\upload'
-            if not os.path.exists(_folder_path):
-                os.makedirs(_folder_path)
-            _datetime_now = datetime.datetime.now()
-            _s_file_name = hashlib.md5(str(_datetime_now) + session['username']).hexdigest() + '.mp3'
-            _file_path = os.path.join(_folder_path, _s_file_name)
-            _file.save(_file_path)
-            # Decode MP3
-            _wav_file_path = unicode(_file_path[:-3] + 'wav', 'gbk')
-            _wav_file_name = _file_name[:-3] + 'wav'
-            _sound = AudioSegment.from_mp3(_file_path)
-            _sound.export(_wav_file_path, format="wav")
-            _wav_upload_files_info = upload_files(_username, _wav_file_name, _wav_file_path)
-            _md5 = ''
-            with open(_file_path, 'rb') as _file_obj:
-                _md5_obj = hashlib.md5()
-                _md5_obj.update(_file_obj.read())
-                _md5 = _md5_obj.hexdigest()
-            _audio = eyed3.load(_file_path)
-            _bitrate = _audio.info.bit_rate[1]
-            _file_in = wave.open(_wav_file_path, 'rb')
-            _play_time = _file_in.getparams()[3] / 22050.
-            _file_size = os.path.getsize(_file_path)
-            _log_double_compression_info = log_double_compression(_username, _datetime_now, _file_name, 
-                                                                  _file_path, _file_size, _bitrate,
+            _file_list = request.files.getlist('file')
+            if _file_list == []:
+                _file_list = request.files.getlist('files[]')
+            for _file in _file_list:
+                _file_name = _file.filename
+                _folder_path = '.\upload'
+                if not os.path.exists(_folder_path):
+                    os.makedirs(_folder_path)
+                _datetime_now = datetime.datetime.now()
+                _s_file_name = hashlib.md5(str(_datetime_now) + session['username']).hexdigest() + '.mp3'
+                _file_path = os.path.join(_folder_path, _s_file_name)
+                _file.save(_file_path)
+                # Decode MP3
+                _wav_file_path = unicode(_file_path[:-3] + 'wav', 'gbk')
+                _wav_file_name = _file_name[:-3] + 'wav'
+                _sound = AudioSegment.from_mp3(_file_path)
+                _sound.export(_wav_file_path, format="wav")
+                _wav_upload_files_info = upload_files(_username, _wav_file_name, _wav_file_path)
+                _md5 = ''
+                with open(_file_path, 'rb') as _file_obj:
+                    _md5_obj = hashlib.md5()
+                    _md5_obj.update(_file_obj.read())
+                    _md5 = _md5_obj.hexdigest()
+                _audio = eyed3.load(_file_path)
+                _bitrate = _audio.info.bit_rate[1]
+                _file_in = wave.open(_wav_file_path, 'rb')
+                _play_time = _file_in.getparams()[3] / 22050.
+                _file_size = os.path.getsize(_file_path)
+                _log_double_compression_info = log_double_compression(_username, _datetime_now, _file_name, 
+                                                                      _file_path, _file_size, _bitrate,
                                                                   _play_time, _md5, 0)
-            _upload_files_info = upload_files(_username, _file_name, _file_path)
-            db.session.add(_wav_upload_files_info)
-            db.session.add(_log_double_compression_info)
-            db.session.add(_upload_files_info)
-            db.session.commit()
-            _p = multiprocessing.Process(target=detect_double_compression_main, args=(_file_path, ))
-            _p.start()
+                _upload_files_info = upload_files(_username, _file_name, _file_path)
+                db.session.add(_wav_upload_files_info)
+                db.session.add(_log_double_compression_info)
+                db.session.add(_upload_files_info)
+                db.session.commit()
+                _p = multiprocessing.Process(target=detect_double_compression_main, args=(_file_path, ))
+                _p.start()
             flash(u'上传成功', 'success')
             return u'文件上传成功'
 

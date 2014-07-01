@@ -1,0 +1,37 @@
+<div class="container">
+  <p></p>
+    <p>
+      <span class="btn btn-primary fileinput-button">
+        <i class="glyphicon glyphicon-plus"></i>
+        <span>选择文件 ...</span>
+        <!-- The file input field used as target for the file upload widget -->
+        <input id="fileupload" type="file" name="files[]" accept="audio/mp3" multiple>
+      </span>
+    </p>
+    <p id="processPercent">上传进度：</p>
+    <div class="progress progress-striped active" style="width: 50%" id="progressNumber">
+      <div class="progress-bar" style="width: 0%;"></div>
+    </div>
+  <script>
+    $(function () {
+      var url = "double_compression";
+      $('#fileupload').fileupload({
+        url: url,
+        dataType: 'json',
+        progressall: function (e, data) {
+          var percent = parseInt(data.loaded / data.total * 100, 10);
+          document.getElementById('processPercent').innerHTML = '上传进度：' + percent + '%';
+          document.getElementById('progressNumber').innerHTML =
+            '<div class="progress-bar" align = "middle" style="width: ' +
+            percent + '%;">' + '</div>';
+          if(percent == 100) {
+            location.reload();
+          }
+        }
+      });
+    });
+  </script>
+</div>
+
+
+
