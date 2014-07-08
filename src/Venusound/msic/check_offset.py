@@ -48,7 +48,7 @@ def deal_with_wave(_offset, _bitrate, _base_path, _encoder):
         _after_sliding_win_l.append(min(_tmp_l[_i], _tmp_l[_i + 1], _tmp_l[_i + 2]))
     _after_sliding_win_l.append(min(_tmp_l[_len_mdct - 2], _tmp_l[_len_mdct - 1]))
     _after_sliding_win_l.append(_tmp_l[_len_mdct - 1])
-    return (_offset, _after_sliding_win_l, _arg_dif_l)
+    return (_offset, _after_sliding_win_l, _arg_dif_l, _tmp_l, )
 
 def deal_with_wave_mf_wrap(args):
     return deal_with_wave(*args)
@@ -93,7 +93,21 @@ def check_offset_speed_up(_bitrate, _mdct_ret_d, _arg_dif_l, _db_l, _base_path, 
     for _i in range(len(_offset) - 3):
         if _offset[_i] == _offset[_i + 3]:
             _offset[_i + 1], _offset[_i + 2] = _offset[_i], _offset[_i]
-    return _offset
+    # Yang's method to check offset
+    _yang_min_num, _yang_offset = [], []
+    for _e in _pool_outputs:
+        _mdct_ret_d[_e[0]] = _e[3]
+    for _i in range(576):
+        _len = len(_mdct_ret_d[_i])
+        if not _i:
+            for _j in range(_len):
+                _yang_min_num.append(_mdct_ret_d[_i][_j])
+                _yang_offset.append(0)
+        else:
+            for _j in range(_len):
+                if _j < len(_yang_min_num) and _mdct_ret_d[_i][_j] < _yang_min_num[_j]:
+                    _yang_min_num[_j], _yang_offset[_j] = _mdct_ret_d[_i][_j], _i
+    return _offset, _yang_offset
 
 def check_offset_main(_file_path):
     # Encoder path
@@ -116,7 +130,7 @@ def check_offset_main(_file_path):
     os.chdir(_temp_path)
     mp3_pre_handle(_abs_file_path, _db_l, _encoder)
     _base_path = _temp_path
-    _offset = check_offset_speed_up(_audio_bitrate, _mdct_ret_d, _arg_dif_l, _db_l, _base_path, _encoder)
+    _offset, _yang_offset = check_offset_speed_up(_audio_bitrate, _mdct_ret_d, _arg_dif_l, _db_l, _base_path, _encoder)
     _offset_len = len(_offset)
     _flag = 1
     for _i in range(_offset_len - 1):
@@ -125,6 +139,7 @@ def check_offset_main(_file_path):
             break
     _log_check_offset_info.flag = _flag
     _log_check_offset_info.offset_list = _offset
+    _log_check_offset_info.yang_offset_list = _yang_offset
     _user_info.need_refresh_check_offset = 1
     db.session.add(_log_check_offset_info)
     db.session.add(_user_info)

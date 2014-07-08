@@ -2,6 +2,13 @@
   margin-bottom: 19px;
 }
 
+.plot-placeholder {
+	width: 100%;
+	height: 250px;
+	font-size: 14px;
+	line-height: 1.2em;
+}
+
 .fileinput-button {
   position: relative;
   overflow: hidden;

@@ -215,7 +215,7 @@ def GetCheckOffsetList():
             _play_time = _file_in.getparams()[3] / 22050.
             _file_size = os.path.getsize(_file_path)
             _log_check_offset_info = log_check_offset(_username, _datetime_now, _file_name, _file_path, 
-                                                      _file_size, _bitrate, _play_time, _md5, 0, [])
+                                                      _file_size, _bitrate, _play_time, _md5, 0, [], [])
             _upload_files_info = upload_files(_username, _file_name, _file_path)
             db.session.add(_wav_upload_files_info)
             db.session.add(_log_check_offset_info)
@@ -248,18 +248,22 @@ def GetCheckOffsetLog(event_id):
             _dict['bitrate'] = _log_check_offset_info.bitrate
             _dict['md5'] = _log_check_offset_info.hash_val
             _dict['flag'] = _log_check_offset_info.flag
-            _dict['offset_list'] = _log_check_offset_info.offset_list
+            _dict['offset_list'] = []
+            for _e in enumerate(_log_check_offset_info.offset_list):
+                _dict['offset_list'].append([_e[0] + 1, _e[1]])
+            _dict['yang_offset_list'] = [] 
+            for _e in enumerate(_log_check_offset_info.yang_offset_list):
+                _dict['yang_offset_list'].append([_e[0] + 1, _e[1]])
             _dict['file_size'] = _log_check_offset_info.file_size
             _dict['play_time'] = _log_check_offset_info.play_time
             _dict['event_id'] = event_id
-            _dict['x-axis'] = [_i for _i in range(1, len(_dict['offset_list']) + 1)]
             _dict['distort-point'] = []
             _dict['conclusion'] = ['']
             _dict['mark_width'] = 1100. * 2. / (len(_dict['offset_list']) + 1)
             _each_frame_time = _log_check_offset_info.play_time / (len(_dict['offset_list']) + 1)
             _cnt = 0
             for _i in range(len(_dict['offset_list'])- 1):
-                if _dict['offset_list'][_i] != _dict['offset_list'][_i + 1]:
+                if _dict['offset_list'][_i][1] != _dict['offset_list'][_i + 1][1]:
                     _cnt += 1
                     _dict['conclusion'].append(u'%d. 篡改发生在第 %d 帧和第 %d 帧之间' % (_cnt, _i, _i + 1))
                     _dict['distort-point'].append(576. / 22050 * _i)
@@ -290,7 +294,7 @@ def MakeCheckOffset(event_id):
             _play_time = _log_double_compression_info.play_time
             _md5 = _log_double_compression_info.hash_val
             _log_check_offset_info = log_check_offset(_username, _datetime_now, _file_name, _file_path, 
-                                                      _file_size, _bitrate, _play_time, _md5, 0, [])
+                                                      _file_size, _bitrate, _play_time, _md5, 0, [], [])
             db.session.add(_log_check_offset_info)
             db.session.commit()
             _p = multiprocessing.Process(target=check_offset_main, args=(_file_path, ))

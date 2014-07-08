@@ -19,8 +19,8 @@
   <div class="panel panel-primary">
   <!-- Default panel contents -->
     <div class="panel-heading">
-        波形图
-        <button type="button" class="btn btn-xs btn-success pull-right" onclick="wavesurfer.playPause()">播放/暂停</button>
+      波形图
+      <button type="button" class="btn btn-xs btn-success pull-right" onclick="wavesurfer.playPause()">播放/暂停</button>
     </div>
     <div class="panel-body">
     <div id="waveform">
@@ -29,9 +29,14 @@
   </div>
   <div class="panel panel-primary">
   <!-- Default panel contents -->
-    <div class="panel-heading">帧偏移图</div>
+    <div class="panel-heading">
+      帧偏移图
+      <label class="pull-right">
+        <input type="checkbox" id="yang-plot"> Show Yang's Plot
+      </label>
+    </div>
     <div class="panel-body">
-      <canvas id="myChart" width="1100" height="200"></canvas>
+      <div id="placeholder" class="plot-placeholder"></div>
     </div>
   </div>
   <div class="panel panel-primary">
@@ -47,6 +52,7 @@
 {% endblock %}
 {% block jsextends %}
 <script>
+/*
 var data = {
     labels: {{ info['x-axis'] }},
 	datasets : [
@@ -57,9 +63,25 @@ var data = {
 			pointStrokeColor : "#fff",
 			data : {{ info['offset_list'] }}
 		}
-	]};
-var ctx = $("#myChart").get(0).getContext("2d");
-var myLine = new Chart(ctx).Line(data);
+	]};*/
+//This is for ploting offsets
+var origin_data = {{ info['offset_list'] }};
+var yang_data = {{ info['yang_offset_list'] }};
+
+$(function() {
+  $.plot("#placeholder", [{data: origin_data, label: "经过优化的测试结果", lines: {fill: true}}]);
+});
+
+$("#yang-plot").click(changePlot);
+
+function changePlot() {
+  if (document.getElementById("yang-plot").checked == true) {
+    $.plot("#placeholder", [{data: origin_data, label: "经过优化的测试结果", lines: {fill: true}}, 
+                            {data: yang_data, label: "Yang 的测试结果", lines: {fill: true}}]);
+  }else{
+    $.plot("#placeholder", [{data: origin_data, label: "经过优化的测试结果", lines: {fill: true}}]);
+  }
+}
 
 //This is for ploting PCM
 var wavesurfer = Object.create(WaveSurfer);
