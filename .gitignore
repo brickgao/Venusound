@@ -1,5 +1,5 @@
 *.pyc
+*.sqlite
 src/main.py
 src/venv
-src/Venusound/bot_data.db
 src/upload
