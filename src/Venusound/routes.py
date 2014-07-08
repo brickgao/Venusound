@@ -9,7 +9,7 @@ from models.UploadFiles import upload_files
 from msic.detect_double_compression import detect_double_compression_main
 from msic.check_offset import check_offset_main
 from pydub import AudioSegment
-import hashlib, os, datetime, eyed3, msic, wave, multiprocessing, blinker
+import hashlib, os, datetime, eyed3, msic, wave, multiprocessing
 
 @app.route('/', methods=['GET'])
 def GetIndex():
