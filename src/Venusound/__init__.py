@@ -6,7 +6,7 @@ from Venusound import *
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bot_data.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 app.config['SECRET_KEY'] = 'quaerendoinvenietis'
 
 db = SQLAlchemy(app)
